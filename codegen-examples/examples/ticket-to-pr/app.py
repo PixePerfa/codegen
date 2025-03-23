@@ -1,6 +1,6 @@
 from codegen import Codebase, CodeAgent
 from codegen.extensions.clients.linear import LinearClient
-from codegen.extensions.events.app import CodegenApp
+from codegen.extensions.events.codegen_app import CodegenApp
 from codegen.extensions.tools.github.create_pr import create_pr
 from codegen.shared.enums.programming_language import ProgrammingLanguage
 from helpers import create_codebase, format_linear_message, has_codegen_label, process_update_event
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 image = modal.Image.debian_slim(python_version="3.13").apt_install("git").pip_install("fastapi[standard]", "codegen==v0.26.3")
 
-app = CodegenApp("linear-bot", image=image, modal_api_key="")
+app = CodegenApp("linear-bot")
 
 
 @app.cls(secrets=[modal.Secret.from_dotenv()], keep_warm=1)
