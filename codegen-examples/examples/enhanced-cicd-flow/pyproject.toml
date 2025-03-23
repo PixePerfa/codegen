@@ -1,0 +1,48 @@
+[project]
+name = "enhanced-cicd-flow"
+version = "0.1.0"
+description = "Enhanced CI/CD Flow using Codegen"
+authors = [
+    {name = "Codegen Team", email = "team@codegen.sh"},
+]
+requires-python = ">=3.13"
+readme = "README.md"
+license = {text = "MIT"}
+
+dependencies = [
+    "codegen>=0.26.3",
+    "fastapi[standard]>=0.110.0",
+    "modal>=0.56.4308",
+    "networkx>=3.2.1",
+    "rich>=13.7.0",
+    "rich-click>=1.7.3",
+    "langchain>=0.1.0",
+    "langchain-core>=0.1.0",
+    "python-dotenv>=1.0.0",
+    "uvicorn>=0.27.0",
+    "slack_sdk>=3.26.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = []
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+skip-magic-trailing-comma = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
