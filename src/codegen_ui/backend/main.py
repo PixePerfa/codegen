@@ -13,6 +13,13 @@ from codegen.sdk.core.symbol import Symbol
 from codegen.sdk.core.file import File as CodegenFile
 from codegen.sdk.core.analysis import analyze_complexity, analyze_dependencies
 
+# Import our new modules
+from .code_quality import analyze_code_quality
+from .refactoring import generate_refactoring_suggestions
+from .test_generation import generate_tests
+from .documentation import generate_documentation
+from .visualization import generate_visualizations
+
 app = FastAPI(title="Codegen UI API", description="API for the Codegen UI")
 
 # Add CORS middleware
@@ -464,6 +471,66 @@ async def get_imports(project_id: str, codebase: Codebase = Depends(get_codebase
                 ]
         
         return imports
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/projects/{project_id}/code-quality")
+async def get_code_quality(
+    project_id: str, 
+    file_path: Optional[str] = None,
+    codebase: Codebase = Depends(get_codebase)
+):
+    try:
+        result = analyze_code_quality(codebase, file_path)
+        return {"status": "success", "result": result}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/projects/{project_id}/refactoring-suggestions")
+async def get_refactoring_suggestions(
+    project_id: str, 
+    file_path: Optional[str] = None,
+    codebase: Codebase = Depends(get_codebase)
+):
+    try:
+        result = generate_refactoring_suggestions(codebase, file_path)
+        return {"status": "success", "result": result}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/projects/{project_id}/test-generation")
+async def get_test_generation(
+    project_id: str, 
+    file_path: Optional[str] = None,
+    codebase: Codebase = Depends(get_codebase)
+):
+    try:
+        result = generate_tests(codebase, file_path)
+        return {"status": "success", "result": result}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/projects/{project_id}/documentation")
+async def get_documentation(
+    project_id: str, 
+    file_path: Optional[str] = None,
+    codebase: Codebase = Depends(get_codebase)
+):
+    try:
+        result = generate_documentation(codebase, file_path)
+        return {"status": "success", "result": result}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/projects/{project_id}/visualizations")
+async def get_visualizations(
+    project_id: str, 
+    file_path: Optional[str] = None,
+    codebase: Codebase = Depends(get_codebase)
+):
+    try:
+        result = generate_visualizations(codebase, file_path)
+        return {"status": "success", "result": result}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 

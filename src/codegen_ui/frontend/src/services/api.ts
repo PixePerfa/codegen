@@ -63,6 +63,29 @@ export const gitApi = {
     api.post(`/projects/${projectId}/git`, data),
 };
 
+// Advanced Features API
+export const advancedFeaturesApi = {
+  // Code Quality Analysis
+  getCodeQuality: (projectId: string, filePath?: string) => 
+    api.get(`/projects/${projectId}/code-quality`, { params: filePath ? { file_path: filePath } : {} }),
+  
+  // Refactoring Suggestions
+  getRefactoringSuggestions: (projectId: string, filePath?: string) => 
+    api.get(`/projects/${projectId}/refactoring-suggestions`, { params: filePath ? { file_path: filePath } : {} }),
+  
+  // Test Generation
+  getTestGeneration: (projectId: string, filePath?: string) => 
+    api.get(`/projects/${projectId}/test-generation`, { params: filePath ? { file_path: filePath } : {} }),
+  
+  // Documentation Generation
+  getDocumentation: (projectId: string, filePath?: string) => 
+    api.get(`/projects/${projectId}/documentation`, { params: filePath ? { file_path: filePath } : {} }),
+  
+  // Visualizations
+  getVisualizations: (projectId: string, filePath?: string) => 
+    api.get(`/projects/${projectId}/visualizations`, { params: filePath ? { file_path: filePath } : {} }),
+};
+
 // WebSocket API
 export const createWebSocketConnection = (projectId: string) => {
   const WS_BASE_URL = process.env.REACT_APP_WS_BASE_URL || 'ws://localhost:8000';
@@ -77,5 +100,6 @@ export default {
   transformApi,
   analysisApi,
   gitApi,
+  advancedFeaturesApi,
   createWebSocketConnection,
 };
