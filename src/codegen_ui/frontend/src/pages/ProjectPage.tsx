@@ -27,6 +27,9 @@ import DependencyGraph from '../components/DependencyGraph';
 import CodeMetrics from '../components/CodeMetrics';
 import BatchOperations from '../components/BatchOperations';
 import GitOperations from '../components/GitOperations';
+import CodeQualityAnalysis from '../components/CodeQualityAnalysis';
+import AdvancedCodeAnalysis from '../components/AdvancedCodeAnalysis';
+import CodeVisualization from '../components/CodeVisualization';
 
 const ProjectPage: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -73,6 +76,29 @@ const ProjectPage: React.FC = () => {
     fetchProject();
   };
 
+  const handleApplyRefactoring = async (filePath: string, content: string) => {
+    try {
+      await projectApi.fileApi.updateFile(projectId, filePath, { path: filePath, content });
+      toast({
+        title: 'Refactoring applied',
+        description: `Changes applied to ${filePath}`,
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+      handleRefresh();
+    } catch (error) {
+      console.error('Error applying refactoring:', error);
+      toast({
+        title: 'Error applying refactoring',
+        description: 'Could not apply changes',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
   if (loading) {
     return (
       <Flex height="100%" alignItems="center" justifyContent="center">
@@ -116,6 +142,7 @@ const ProjectPage: React.FC = () => {
               <Tab>Search</Tab>
               <Tab>Transform</Tab>
               <Tab>Analysis</Tab>
+              <Tab>Advanced</Tab>
               <Tab>Batch</Tab>
               <Tab>Git</Tab>
             </TabList>
@@ -150,6 +177,8 @@ const ProjectPage: React.FC = () => {
                   <TabList px={4} pt={4}>
                     <Tab>Dependencies</Tab>
                     <Tab>Metrics</Tab>
+                    <Tab>Quality</Tab>
+                    <Tab>Visualizations</Tab>
                   </TabList>
                   <TabPanels flex="1" overflow="auto">
                     <TabPanel p={4} h="100%" overflow="auto">
@@ -163,8 +192,32 @@ const ProjectPage: React.FC = () => {
                         projectId={projectId} 
                       />
                     </TabPanel>
+                    <TabPanel p={4} h="100%" overflow="auto">
+                      <CodeQualityAnalysis 
+                        projectId={projectId}
+                        filePath={selectedFile?.path}
+                      />
+                    </TabPanel>
+                    <TabPanel p={4} h="100%" overflow="auto">
+                      <CodeVisualization 
+                        projectId={projectId}
+                        filePath={selectedFile?.path}
+                        onNodeClick={(filePath) => {
+                          projectApi.fileApi.getFile(projectId, filePath)
+                            .then(response => handleFileSelect(response.data))
+                            .catch(error => console.error('Error loading file:', error));
+                        }}
+                      />
+                    </TabPanel>
                   </TabPanels>
                 </Tabs>
+              </TabPanel>
+              <TabPanel p={4} h="100%" overflow="auto">
+                <AdvancedCodeAnalysis 
+                  projectId={projectId}
+                  filePath={selectedFile?.path}
+                  onApplyRefactoring={handleApplyRefactoring}
+                />
               </TabPanel>
               <TabPanel p={4} h="100%" overflow="auto">
                 <BatchOperations 
