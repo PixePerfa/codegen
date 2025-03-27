@@ -13,7 +13,8 @@ import {
   Flex,
   Badge,
   Spinner,
-  useToast
+  useToast,
+  HStack
 } from '@chakra-ui/react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { projectApi } from '../services/api';
@@ -30,6 +31,10 @@ import GitOperations from '../components/GitOperations';
 import CodeQualityAnalysis from '../components/CodeQualityAnalysis';
 import AdvancedCodeAnalysis from '../components/AdvancedCodeAnalysis';
 import CodeVisualization from '../components/CodeVisualization';
+import CodebaseOperations from '../components/CodebaseOperations';
+import SymbolUsages from '../components/SymbolUsages';
+import RegexSearch from '../components/RegexSearch';
+import CreateDirectory from '../components/CreateDirectory';
 
 const ProjectPage: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -99,6 +104,28 @@ const ProjectPage: React.FC = () => {
     }
   };
 
+  const handleFileClick = (filePath: string, line?: number) => {
+    try {
+      projectApi.fileApi.getFile(projectId, filePath)
+        .then(response => {
+          handleFileSelect(response.data);
+          // TODO: Scroll to line in editor
+        })
+        .catch(error => {
+          console.error('Error loading file:', error);
+          toast({
+            title: 'Error loading file',
+            description: `Could not load file: ${filePath}`,
+            status: 'error',
+            duration: 3000,
+            isClosable: true,
+          });
+        });
+    } catch (error) {
+      console.error('Error handling file click:', error);
+    }
+  };
+
   if (loading) {
     return (
       <Flex height="100%" alignItems="center" justifyContent="center">
@@ -120,20 +147,30 @@ const ProjectPage: React.FC = () => {
 
   return (
     <Box p={4} h="calc(100vh - 60px)">
-      <Flex mb={4} alignItems="center">
+      <Flex mb={4} alignItems="center" justifyContent="space-between">
         <Box>
           <Heading size="lg">{project.name}</Heading>
           <Text color="gray.500">{project.path}</Text>
         </Box>
-        <Badge ml={4} colorScheme="blue">{project.language}</Badge>
+        <HStack spacing={4}>
+          <Badge colorScheme="blue">{project.language}</Badge>
+          <CreateDirectory 
+            projectId={projectId} 
+            onDirectoryCreated={handleRefresh} 
+          />
+        </HStack>
       </Flex>
       
       <Grid
         h="calc(100% - 60px)"
-        templateRows="1fr"
+        templateRows="auto 1fr"
         templateColumns="300px 1fr"
         gap={4}
       >
+        <GridItem rowSpan={1} colSpan={2}>
+          <CodebaseOperations projectId={projectId} />
+        </GridItem>
+        
         <GridItem rowSpan={1} colSpan={1} borderWidth="1px" borderRadius="md" overflow="hidden">
           <Tabs isFitted variant="enclosed" h="100%" display="flex" flexDirection="column">
             <TabList>
@@ -154,17 +191,49 @@ const ProjectPage: React.FC = () => {
                   onFileSelect={handleFileSelect} 
                 />
               </TabPanel>
-              <TabPanel p={4} h="100%" overflow="auto">
-                <SymbolBrowser 
-                  projectId={projectId} 
-                  onSymbolSelect={handleFileSelect} 
-                />
+              <TabPanel p={0} h="100%" overflow="auto">
+                <Tabs variant="soft-rounded" colorScheme="blue" h="100%" display="flex" flexDirection="column">
+                  <TabList px={4} pt={4}>
+                    <Tab>Browser</Tab>
+                    <Tab>Usages</Tab>
+                  </TabList>
+                  <TabPanels flex="1" overflow="auto">
+                    <TabPanel p={4} h="100%" overflow="auto">
+                      <SymbolBrowser 
+                        projectId={projectId} 
+                        onSymbolSelect={handleFileSelect} 
+                      />
+                    </TabPanel>
+                    <TabPanel p={4} h="100%" overflow="auto">
+                      <SymbolUsages 
+                        projectId={projectId} 
+                        onFileClick={handleFileClick} 
+                      />
+                    </TabPanel>
+                  </TabPanels>
+                </Tabs>
               </TabPanel>
-              <TabPanel p={4} h="100%" overflow="auto">
-                <CodeSearch 
-                  projectId={projectId} 
-                  onResultSelect={handleFileSelect} 
-                />
+              <TabPanel p={0} h="100%" overflow="auto">
+                <Tabs variant="soft-rounded" colorScheme="blue" h="100%" display="flex" flexDirection="column">
+                  <TabList px={4} pt={4}>
+                    <Tab>Text</Tab>
+                    <Tab>Regex</Tab>
+                  </TabList>
+                  <TabPanels flex="1" overflow="auto">
+                    <TabPanel p={4} h="100%" overflow="auto">
+                      <CodeSearch 
+                        projectId={projectId} 
+                        onResultSelect={handleFileSelect} 
+                      />
+                    </TabPanel>
+                    <TabPanel p={4} h="100%" overflow="auto">
+                      <RegexSearch 
+                        projectId={projectId} 
+                        onFileClick={handleFileClick} 
+                      />
+                    </TabPanel>
+                  </TabPanels>
+                </Tabs>
               </TabPanel>
               <TabPanel p={4} h="100%" overflow="auto">
                 <CodeTransform 
@@ -202,11 +271,7 @@ const ProjectPage: React.FC = () => {
                       <CodeVisualization 
                         projectId={projectId}
                         filePath={selectedFile?.path}
-                        onNodeClick={(filePath) => {
-                          projectApi.fileApi.getFile(projectId, filePath)
-                            .then(response => handleFileSelect(response.data))
-                            .catch(error => console.error('Error loading file:', error));
-                        }}
+                        onNodeClick={handleFileClick}
                       />
                     </TabPanel>
                   </TabPanels>
