@@ -12,9 +12,11 @@
     "monaco-editor": "^0.40.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-force-graph": "^1.43.0",
     "react-icons": "^4.10.1",
     "react-router-dom": "^6.14.2",
     "react-scripts": "5.0.1",
+    "recharts": "^2.7.2",
     "typescript": "^4.9.5"
   },
   "scripts": {

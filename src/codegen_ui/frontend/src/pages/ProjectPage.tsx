@@ -23,6 +23,10 @@ import CodeEditor from '../components/CodeEditor';
 import SymbolBrowser from '../components/SymbolBrowser';
 import CodeSearch from '../components/CodeSearch';
 import CodeTransform from '../components/CodeTransform';
+import DependencyGraph from '../components/DependencyGraph';
+import CodeMetrics from '../components/CodeMetrics';
+import BatchOperations from '../components/BatchOperations';
+import GitOperations from '../components/GitOperations';
 
 const ProjectPage: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -111,6 +115,9 @@ const ProjectPage: React.FC = () => {
               <Tab>Symbols</Tab>
               <Tab>Search</Tab>
               <Tab>Transform</Tab>
+              <Tab>Analysis</Tab>
+              <Tab>Batch</Tab>
+              <Tab>Git</Tab>
             </TabList>
             
             <TabPanels flex="1" overflow="hidden">
@@ -136,6 +143,39 @@ const ProjectPage: React.FC = () => {
                 <CodeTransform 
                   projectId={projectId} 
                   onTransformComplete={handleRefresh} 
+                />
+              </TabPanel>
+              <TabPanel p={0} h="100%" overflow="auto">
+                <Tabs variant="soft-rounded" colorScheme="blue" h="100%" display="flex" flexDirection="column">
+                  <TabList px={4} pt={4}>
+                    <Tab>Dependencies</Tab>
+                    <Tab>Metrics</Tab>
+                  </TabList>
+                  <TabPanels flex="1" overflow="auto">
+                    <TabPanel p={4} h="100%" overflow="auto">
+                      <DependencyGraph 
+                        projectId={projectId} 
+                        onNodeClick={handleFileSelect} 
+                      />
+                    </TabPanel>
+                    <TabPanel p={4} h="100%" overflow="auto">
+                      <CodeMetrics 
+                        projectId={projectId} 
+                      />
+                    </TabPanel>
+                  </TabPanels>
+                </Tabs>
+              </TabPanel>
+              <TabPanel p={4} h="100%" overflow="auto">
+                <BatchOperations 
+                  projectId={projectId} 
+                  onOperationComplete={handleRefresh} 
+                />
+              </TabPanel>
+              <TabPanel p={4} h="100%" overflow="auto">
+                <GitOperations 
+                  projectId={projectId} 
+                  onOperationComplete={handleRefresh} 
                 />
               </TabPanel>
             </TabPanels>

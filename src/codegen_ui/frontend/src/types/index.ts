@@ -66,3 +66,72 @@ export interface TransformResult {
   status: string;
   result: string;
 }
+
+// Batch operation types
+export interface BatchOperation {
+  operation: string;
+  files: string[];
+  params: any;
+}
+
+export interface BatchResult {
+  status: string;
+  results: {
+    file: string;
+    result: string;
+  }[];
+}
+
+// Analysis types
+export interface AnalysisRequest {
+  type: string;
+  target?: string;
+  params?: any;
+}
+
+export interface AnalysisResult {
+  status: string;
+  result: any;
+}
+
+// Dependency types
+export interface Dependency {
+  source: {
+    name: string;
+    type: string;
+    file_path: string;
+  };
+  target: {
+    name: string;
+    type: string;
+    file_path: string;
+  };
+}
+
+// Import types
+export interface Import {
+  module: string;
+  name: string;
+  alias?: string;
+  is_relative: boolean;
+}
+
+// Git operation types
+export interface GitOperation {
+  operation: string;
+  params: any;
+}
+
+export interface GitResult {
+  status: string;
+  result: any;
+}
+
+// Metrics types
+export interface CodeMetrics {
+  total_files: number;
+  total_symbols: number;
+  total_classes: number;
+  total_functions: number;
+  lines_of_code: number;
+}
