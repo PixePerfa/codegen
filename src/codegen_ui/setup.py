@@ -1,7 +1,15 @@
 import os
 import subprocess
 import sys
+import platform
 from pathlib import Path
+
+def is_wsl():
+    """Check if running in Windows Subsystem for Linux."""
+    if os.path.exists('/proc/version'):
+        with open('/proc/version', 'r') as f:
+            return 'microsoft' in f.read().lower()
+    return False
 
 def setup_backend():
     """Set up the backend dependencies."""
@@ -41,7 +49,29 @@ def run_backend():
     os.chdir(backend_dir)
     
     # Run the backend server
-    subprocess.check_call([sys.executable, "-m", "uvicorn", "main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"])
+    host = "0.0.0.0"  # Listen on all interfaces
+    port = 8000
+    
+    # If running in WSL, print a helpful message
+    if is_wsl():
+        print("\nRunning in WSL environment.")
+        print("To access the UI from Windows, use: http://localhost:3000")
+        print("The backend API will be available at: http://localhost:8000")
+        print("If you encounter connection issues, you may need to:")
+        print("1. Check your Windows firewall settings")
+        print("2. Use the WSL IP address instead of localhost")
+        
+        # Try to get the WSL IP address
+        try:
+            import socket
+            hostname = socket.gethostname()
+            ip_address = socket.gethostbyname(hostname)
+            print(f"WSL IP address: {ip_address}")
+            print(f"Alternative backend URL: http://{ip_address}:{port}")
+        except Exception:
+            pass
+    
+    subprocess.check_call([sys.executable, "-m", "uvicorn", "main:app", "--reload", "--host", host, "--port", str(port)])
 
 def run_frontend():
     """Run the frontend development server."""

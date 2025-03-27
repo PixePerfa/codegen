@@ -4,6 +4,7 @@ export interface Project {
   name: string;
   language: string;
   path: string;
+  initialized?: boolean;
 }
 
 // File types
