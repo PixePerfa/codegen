@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { createContext, useContext } from 'react';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
 
@@ -21,6 +22,8 @@ export const projectApi = {
   listProjects: () => api.get('/projects'),
   getProject: (id: string) => api.get(`/projects/${id}`),
   createProject: (data: { path: string; language?: string; auto_init?: boolean }) => api.post('/projects', data),
+  commitChanges: (projectId: string) => api.post(`/projects/${projectId}/commit`),
+  resetCodebase: (projectId: string) => api.post(`/projects/${projectId}/reset`),
 };
 
 // File API
@@ -33,6 +36,8 @@ export const fileApi = {
     api.put(`/projects/${projectId}/files/${path}`, data),
   deleteFile: (projectId: string, path: string) => 
     api.delete(`/projects/${projectId}/files/${path}`),
+  createDirectory: (projectId: string, data: { path: string }) => 
+    api.post(`/projects/${projectId}/directories`, data),
 };
 
 // Symbol API
@@ -42,12 +47,16 @@ export const symbolApi = {
   listFunctions: (projectId: string) => api.get(`/projects/${projectId}/functions`),
   getDependencies: (projectId: string) => api.get(`/projects/${projectId}/dependencies`),
   getImports: (projectId: string) => api.get(`/projects/${projectId}/imports`),
+  getSymbolUsages: (projectId: string, symbolName: string) => 
+    api.get(`/projects/${projectId}/symbols/${encodeURIComponent(symbolName)}/usages`),
 };
 
 // Search API
 export const searchApi = {
   search: (projectId: string, data: { query: string; file_pattern?: string }) => 
     api.post(`/projects/${projectId}/search`, data),
+  regexSearch: (projectId: string, data: { pattern: string; file_pattern?: string }) => 
+    api.post(`/projects/${projectId}/regex-search`, data),
 };
 
 // Transform API
@@ -98,6 +107,16 @@ export const createWebSocketConnection = (projectId: string) => {
   const WS_BASE_URL = process.env.REACT_APP_WS_BASE_URL || 'ws://localhost:8000';
   return new WebSocket(`${WS_BASE_URL}/ws/${projectId}`);
 };
+
+// Simple API wrapper for components
+export const ApiContext = createContext({
+  get: (url: string) => api.get(url).then(res => res.data),
+  post: (url: string, data?: any) => api.post(url, data).then(res => res.data),
+  put: (url: string, data?: any) => api.put(url, data).then(res => res.data),
+  delete: (url: string) => api.delete(url).then(res => res.data),
+});
+
+export const useApi = () => useContext(ApiContext);
 
 export default {
   systemApi,
