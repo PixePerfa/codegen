@@ -9,11 +9,18 @@ const api = axios.create({
   },
 });
 
+// System API
+export const systemApi = {
+  getSystemInfo: () => api.get('/system-info'),
+  scanProjects: (data: { base_path?: string }) => api.post('/scan-projects', data),
+  initialize: (data: { path: string; language?: string }) => api.post('/initialize', data),
+};
+
 // Project API
 export const projectApi = {
   listProjects: () => api.get('/projects'),
   getProject: (id: string) => api.get(`/projects/${id}`),
-  createProject: (data: { path: string; language?: string }) => api.post('/projects', data),
+  createProject: (data: { path: string; language?: string; auto_init?: boolean }) => api.post('/projects', data),
 };
 
 // File API
@@ -93,6 +100,7 @@ export const createWebSocketConnection = (projectId: string) => {
 };
 
 export default {
+  systemApi,
   projectApi,
   fileApi,
   symbolApi,
