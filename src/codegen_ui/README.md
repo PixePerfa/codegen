@@ -1,122 +1,97 @@
-# Codegen UI
+# CodeGen UI
 
-A graphical user interface for the Codegen SDK that allows you to visualize and manipulate codebases through an intuitive interface.
+A comprehensive graphical user interface for the CodeGen SDK, allowing users to access all of the library's features through an intuitive interface.
 
 ## Features
 
-- **Project Management**: Select and manage multiple codebases
+- **Project Management**: Load and manage multiple codebases
 - **File Explorer**: Browse and navigate through the codebase's file structure
 - **Symbol Browser**: View and navigate classes, functions, and other symbols
 - **Code Editor**: Edit files with syntax highlighting and code completion
 - **Code Search**: Search for code patterns across the codebase
 - **Code Transformation**: Apply code transformations like renaming symbols and moving code
+- **Dependency Visualization**: Visualize code dependencies with an interactive graph
+- **Code Metrics**: View code metrics and complexity analysis
+- **Batch Operations**: Apply operations across multiple files at once
+- **Git Integration**: Perform Git operations directly from the UI
 
-## Architecture
-
-The Codegen UI consists of two main components:
-
-1. **Backend API**: A FastAPI-based REST API that interfaces with the Codegen SDK
-2. **Frontend UI**: A React-based web application that provides the user interface
-
-## Getting Started
-
-### Prerequisites
-
-- Python 3.8 or higher
-- Node.js 14 or higher
-- npm 6 or higher
-
-### Installation
+## Installation
 
 1. Clone the repository:
-   ```
-   git clone https://github.com/PixePerfa/codegen.git
-   cd codegen
-   ```
+```bash
+git clone https://github.com/PixePerfa/codegen.git
+cd codegen
+```
 
 2. Set up the environment:
-   ```
-   cd src/codegen_ui
-   python setup.py setup
-   ```
-
-### Running the UI
-
-You can run the backend and frontend separately or together:
-
-- Run both together:
-  ```
-  python setup.py all
-  ```
-
-- Run just the backend:
-  ```
-  python setup.py backend
-  ```
-
-- Run just the frontend:
-  ```
-  python setup.py frontend
-  ```
-
-The UI will be available at http://localhost:3000, and the API will be available at http://localhost:8000.
+```bash
+cd src/codegen_ui
+python setup.py setup
+```
 
 ## Usage
 
-### Creating a Project
+1. Start the UI:
+```bash
+cd src/codegen_ui
+python setup.py all
+```
 
-1. Open the UI in your browser at http://localhost:3000
-2. Click "New Project" on the home page
-3. Enter the path to your codebase and select the language (optional)
-4. Click "Create"
+2. Open your browser and navigate to http://localhost:3000
 
-### Browsing Files
+3. Create a new project by providing the path to your codebase
 
-1. Select a project from the home page
-2. Use the file explorer in the left panel to navigate through the codebase
-3. Click on a file to open it in the editor
+## Components
 
-### Browsing Symbols
+### File Explorer
+- Browse through the file structure of your codebase
+- Filter files by name
+- View file content in the code editor
 
-1. Select a project from the home page
-2. Click on the "Symbols" tab in the left panel
-3. Browse through classes, functions, and other symbols
-4. Click on a symbol to open its file in the editor
+### Symbol Browser
+- View all symbols (classes, functions, etc.) in your codebase
+- Filter symbols by name or type
+- Navigate to symbol definitions
 
-### Searching Code
+### Code Search
+- Search for code patterns using regular expressions
+- Filter search results by file pattern
+- Navigate to search results
 
-1. Select a project from the home page
-2. Click on the "Search" tab in the left panel
-3. Enter a search query and optional file pattern
-4. Click "Search" to find matching code
-5. Click on a result to open the file in the editor
+### Code Transformation
+- Rename symbols across the codebase
+- Move symbols between files
+- Rename files with automatic import updates
 
-### Transforming Code
+### Dependency Graph
+- Visualize code dependencies with an interactive graph
+- Filter dependencies by type
+- Navigate to symbols by clicking on nodes
 
-1. Select a project from the home page
-2. Click on the "Transform" tab in the left panel
-3. Select an operation (e.g., rename symbol, move symbol)
-4. Enter the required parameters
-5. Click "Execute Transformation" to apply the changes
+### Code Metrics
+- View code metrics like total files, symbols, classes, and functions
+- Analyze code complexity
+- Identify complex functions that might need refactoring
+
+### Batch Operations
+- Apply operations to multiple files at once
+- Replace text using regular expressions
+- Add or remove imports across multiple files
+
+### Git Operations
+- View Git status
+- Create and checkout branches
+- Commit changes
+- Pull and push changes
 
 ## Development
 
 ### Backend
-
-The backend is built with FastAPI and provides a RESTful API for the frontend to interact with the Codegen SDK. The main components are:
-
-- `main.py`: The main FastAPI application
-- API endpoints for projects, files, symbols, search, and transformations
+The backend is built with FastAPI and provides a RESTful API for the frontend to interact with the CodeGen SDK.
 
 ### Frontend
-
-The frontend is built with React, TypeScript, and Chakra UI. The main components are:
-
-- `App.tsx`: The main application component
-- `ProjectsPage.tsx`: The home page showing all projects
-- `ProjectPage.tsx`: The project page showing the file explorer, editor, and other tools
-- Components for file explorer, symbol browser, code editor, search, and transformations
+The frontend is built with React, TypeScript, and Chakra UI, providing a modern and responsive user interface.
 
 ## License
 
-This project is licensed under the same license as the Codegen SDK.
+This project is licensed under the Apache License 2.0 - see the LICENSE file for details.

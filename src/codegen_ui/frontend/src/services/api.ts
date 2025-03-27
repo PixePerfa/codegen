@@ -33,6 +33,8 @@ export const symbolApi = {
   listSymbols: (projectId: string) => api.get(`/projects/${projectId}/symbols`),
   listClasses: (projectId: string) => api.get(`/projects/${projectId}/classes`),
   listFunctions: (projectId: string) => api.get(`/projects/${projectId}/functions`),
+  getDependencies: (projectId: string) => api.get(`/projects/${projectId}/dependencies`),
+  getImports: (projectId: string) => api.get(`/projects/${projectId}/imports`),
 };
 
 // Search API
@@ -45,6 +47,20 @@ export const searchApi = {
 export const transformApi = {
   transform: (projectId: string, data: { operation: string; params: any }) => 
     api.post(`/projects/${projectId}/transform`, data),
+  batchOperation: (projectId: string, data: { operation: string; files: string[]; params: any }) => 
+    api.post(`/projects/${projectId}/batch`, data),
+};
+
+// Analysis API
+export const analysisApi = {
+  analyze: (projectId: string, data: { type: string; target?: string; params?: any }) => 
+    api.post(`/projects/${projectId}/analysis`, data),
+};
+
+// Git API
+export const gitApi = {
+  gitOperation: (projectId: string, data: { operation: string; params: any }) => 
+    api.post(`/projects/${projectId}/git`, data),
 };
 
 // WebSocket API
@@ -59,5 +75,7 @@ export default {
   symbolApi,
   searchApi,
   transformApi,
+  analysisApi,
+  gitApi,
   createWebSocketConnection,
 };

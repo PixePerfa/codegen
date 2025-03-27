@@ -9,6 +9,9 @@ from uuid import uuid4
 
 from codegen.sdk.core.codebase import Codebase
 from codegen.shared.enums.programming_language import ProgrammingLanguage
+from codegen.sdk.core.symbol import Symbol
+from codegen.sdk.core.file import File as CodegenFile
+from codegen.sdk.core.analysis import analyze_complexity, analyze_dependencies
 
 app = FastAPI(title="Codegen UI API", description="API for the Codegen UI")
 
@@ -45,6 +48,20 @@ class SearchRequest(BaseModel):
     file_pattern: Optional[str] = None
 
 class TransformRequest(BaseModel):
+    operation: str
+    params: Dict[str, Any]
+
+class BatchOperationRequest(BaseModel):
+    operation: str
+    files: List[str]
+    params: Dict[str, Any]
+
+class AnalysisRequest(BaseModel):
+    type: str
+    target: Optional[str] = None
+    params: Optional[Dict[str, Any]] = None
+
+class GitOperationRequest(BaseModel):
     operation: str
     params: Dict[str, Any]
 
@@ -292,6 +309,161 @@ async def transform_codebase(
             codebase.commit()
         
         return {"status": "success", "result": str(result)}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/projects/{project_id}/batch")
+async def batch_operation(
+    project_id: str,
+    request: BatchOperationRequest,
+    codebase: Codebase = Depends(get_codebase)
+):
+    try:
+        results = []
+        
+        # Map operation to method
+        operations = {
+            "replace_text": lambda file, params: file.replace_text(
+                params["pattern"], params["replacement"]
+            ),
+            "add_import": lambda file, params: file.add_import(
+                params["import_statement"]
+            ),
+            "remove_import": lambda file, params: file.remove_import(
+                params["import_statement"]
+            ),
+        }
+        
+        if request.operation not in operations:
+            raise ValueError(f"Unknown batch operation: {request.operation}")
+        
+        # Execute the operation on each file
+        for file_path in request.files:
+            file = codebase.get_file(file_path)
+            result = operations[request.operation](file, request.params)
+            results.append({
+                "file": file_path,
+                "result": str(result)
+            })
+        
+        # Commit changes
+        codebase.commit()
+        
+        return {"status": "success", "results": results}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/projects/{project_id}/analysis")
+async def analyze_codebase(
+    project_id: str,
+    request: AnalysisRequest,
+    codebase: Codebase = Depends(get_codebase)
+):
+    try:
+        # Map analysis type to function
+        analysis_types = {
+            "complexity": lambda target, params: analyze_complexity(
+                codebase.get_file(target) if target else codebase
+            ),
+            "dependencies": lambda target, params: analyze_dependencies(
+                codebase.get_file(target) if target else codebase
+            ),
+            "imports": lambda target, params: {
+                file.path: [imp for imp in file.imports] 
+                for file in (
+                    [codebase.get_file(target)] if target else codebase.files(extensions="*")
+                ) if hasattr(file, "imports")
+            },
+            "metrics": lambda target, params: {
+                "total_files": len(codebase.files(extensions="*")),
+                "total_symbols": len(codebase.symbols),
+                "total_classes": len(codebase.classes),
+                "total_functions": len(codebase.functions),
+                "lines_of_code": sum(len(file.content.splitlines()) for file in codebase.files(extensions="*")),
+            }
+        }
+        
+        if request.type not in analysis_types:
+            raise ValueError(f"Unknown analysis type: {request.type}")
+        
+        # Execute the analysis
+        result = analysis_types[request.type](request.target, request.params or {})
+        
+        return {"status": "success", "result": result}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/projects/{project_id}/git")
+async def git_operation(
+    project_id: str,
+    request: GitOperationRequest,
+    codebase: Codebase = Depends(get_codebase)
+):
+    try:
+        # Map git operation to method
+        operations = {
+            "commit": lambda params: codebase.git_commit(params["message"]),
+            "status": lambda params: codebase.git_status(),
+            "checkout": lambda params: codebase.git_checkout(params["branch"]),
+            "create_branch": lambda params: codebase.git_create_branch(params["branch"]),
+            "pull": lambda params: codebase.git_pull(),
+            "push": lambda params: codebase.git_push(),
+        }
+        
+        if request.operation not in operations:
+            raise ValueError(f"Unknown git operation: {request.operation}")
+        
+        # Execute the operation
+        result = operations[request.operation](request.params)
+        
+        return {"status": "success", "result": result}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/projects/{project_id}/dependencies")
+async def get_dependencies(project_id: str, codebase: Codebase = Depends(get_codebase)):
+    try:
+        # Get all symbols and their dependencies
+        dependencies = []
+        
+        for symbol in codebase.symbols:
+            if hasattr(symbol, "dependencies"):
+                for dep in symbol.dependencies:
+                    dependencies.append({
+                        "source": {
+                            "name": symbol.name,
+                            "type": symbol.symbol_type.name,
+                            "file_path": symbol.file.path,
+                        },
+                        "target": {
+                            "name": dep.name,
+                            "type": dep.symbol_type.name,
+                            "file_path": dep.file.path,
+                        }
+                    })
+        
+        return dependencies
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/projects/{project_id}/imports")
+async def get_imports(project_id: str, codebase: Codebase = Depends(get_codebase)):
+    try:
+        imports = {}
+        
+        for file in codebase.files(extensions="*"):
+            if hasattr(file, "imports"):
+                imports[file.path] = [
+                    {
+                        "module": imp.module,
+                        "name": imp.name,
+                        "alias": imp.alias,
+                        "is_relative": imp.is_relative
+                    }
+                    for imp in file.imports
+                ]
+        
+        return imports
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
