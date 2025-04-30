@@ -1,7 +1,7 @@
 import logging
 from logging import getLogger
 import modal
-from codegen.extensions.events.app import CodegenApp
+from codegen.extensions.events.codegen_app import CodegenApp
 from fastapi import Request
 from codegen.extensions.github.types.events.pull_request import PullRequestLabeledEvent, PullRequestUnlabeledEvent
 from helpers import remove_bot_comments, pr_review_agent
@@ -26,7 +26,7 @@ base_image = (
     )
 )
 
-app = CodegenApp(name="github", image=base_image, modal_api_key="")
+app = CodegenApp(name="github")
 
 
 @app.github.event("pull_request:labeled")
