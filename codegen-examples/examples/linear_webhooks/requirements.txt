@@ -1,0 +1,4 @@
+codegen>=0.22.2
+modal>=0.73.25
+fastapi[standard]
+python-dotenv
